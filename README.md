@@ -1,0 +1,1 @@
+# vscode-linux-nrf96-blinky
