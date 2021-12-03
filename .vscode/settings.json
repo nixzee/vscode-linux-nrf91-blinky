@@ -1,3 +1,7 @@
 {
     "cmake.generator": "Ninja",
+    "cmake.cmakePath": "/usr/local/bin/cmake",
+
+    "cortex-debug.JLinkGDBServerPath": "/usr/bin/JLinkGDBServer",
+    "cortex-debug.armToolchainPrefix": "arm-none-eabi"
 }

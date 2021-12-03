@@ -9,9 +9,9 @@
             "type": "cortex-debug",
             "servertype": "jlink",
             "gdbPath" : "arm-none-eabi-gdb",
+            "device": "nrf9160_xxAA",
             "interface": "swd",
             "svdFile": "${workspaceFolder}/../modules/hal/nordic/nrfx/mdk/nrf9610.svd",
-            "device": "nrf9160_xxAA",
             "runToMain": true,
             "preLaunchCommands": [
                 "load"
