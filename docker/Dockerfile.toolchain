@@ -1,7 +1,80 @@
 #syntax=docker/dockerfile:1.2
 #---------------------------------------------------------------------------------------------------
 # Toolchain
-#
+# Description: This dockerfile is responsible for creating a Toolchain image that is used to build
+# artifacts.
 #---------------------------------------------------------------------------------------------------
 
-# TODO
+# declare arguments with defaults
+# Docker args
+ARG DOCKER_BUILD_IMAGE="ubuntu:20.04"
+# Debian/Ubuntu Env args
+ARG DEBIAN_FRONTEND=noninteractive
+# ARM GCC (Toolchain) args
+ARG ARM_NONE_EABI_BASE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm"
+ARG ARM_NONE_EABI_PACKAGE_DATE="9-2019q4"
+ARG ARM_NONE_EABI_PACKAGE_VERSION="9-2019-q4-major"
+ARG ARM_NONE_EABI_ARCH="x86_64"
+ARG ARM_NONE_EABI_PACKAGE_NAME="gcc-arm-none-eabi-$ARM_NONE_EABI_PACKAGE_VERSION"
+ARG ARM_NONE_EABI_PACKAGE_FILENAME="$ARM_NONE_EABI_PACKAGE_NAME-$ARM_NONE_EABI_ARCH-linux.tar.bz2" 
+ARG ARM_NONE_EABI_FULL_URL="$ARM_NONE_EABI_BASE_URL/$ARM_NONE_EABI_PACKAGE_DATE/$ARM_NONE_EABI_PACKAGE_FILENAME"
+ARG TOOLCHAIN_BASE_PATH="/usr/local"
+ARG TOOLCHAIN_FULL_PATH="$TOOLCHAIN_BASE_PATH/$ARM_NONE_EABI_PACKAGE_NAME/bin"
+# Meta args
+ARG GIT_COMMIT="unspecified"
+ARG MAINTAINERS="https://github.com/nixzee"
+
+# #---------------------------------------------------------------------------------------------------
+# # Section: base
+# # Sets up all the dependencies and compiler
+# #---------------------------------------------------------------------------------------------------
+# FROM ${DOCKER_BUILD_IMAGE} AS base
+
+# # Declare args in scope
+# ARG DEBIAN_FRONTEND
+# ARG ARM_NONE_EABI_BASE_URL
+# ARG ARM_NONE_EABI_PACKAGE_DATE
+# ARG ARM_NONE_EABI_PACKAGE_VERSION
+# ARG ARM_NONE_EABI_ARCH
+# ARG ARM_NONE_EABI_PACKAGE_NAME
+# ARG ARM_NONE_EABI_PACKAGE_FILENAME
+# ARG ARM_NONE_EABI_FULL_URL
+# ARG TOOLCHAIN_BASE_PATH
+# ARG TOOLCHAIN_FULL_PATH
+# ARG GIT_COMMIT
+# ARG MAINTAINERS
+
+# # Set the Debian interactive dialogue
+# # Explination: https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubuntu-debian/
+# ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+
+# # Install dependecy packages
+# RUN apt-get update && \
+#     apt-get install -y \
+#     git \
+#     build-essential \
+#     libncurses5 \
+#     wget \
+#     make \
+#     cmake \
+#     python3 \
+#     && apt-get clean
+
+# # Download and Install arm-none-eabi-gcc
+# RUN wget $ARM_NONE_EABI_FULL_URL \
+#     && tar -xvf ${ARM_NONE_EABI_PACKAGE_FILENAME} --strip-components=1 -C ${TOOLCHAIN_BASE_PATH} \
+#     && rm -rf ${ARM_NONE_EABI_PACKAGE_FILENAME}
+
+# # Set the toolchain path and check
+# ENV PATH "${TOOLCHAIN_FULL_PATH}:$PATH"
+# RUN arm-none-eabi-gcc --version
+
+# # Setup the working directory
+# RUN mkdir workspace
+
+# # Set labels
+# LABEL commit=${GIT_COMMIT}
+# LABEL maintainer=${MAINTAINERS}
+
+# # TODO: Multi-stage the gcc toolchain to remove the tar layer and copy only what is needed.
+# # TODO: Should look into slimming down image considerably and maybe switch from Ubuntu.

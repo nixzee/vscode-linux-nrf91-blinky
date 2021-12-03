@@ -2,7 +2,8 @@
 #$env:DOCKER_BUILDKIT=1
 #-----------------------------------------------------------------------------------------
 # CI/CD Shell Script
-# Decription: The purpose of this script is assit in bootstrapping the CICD needs. It also
+# Decription: The purpose of this script is assit in bootstrapping the CICD needs and 
+# create a layer of abstraction so the user doesn't need to remember all commands. It also
 # allows the user to run both locally and remotely. A user should be able to run a too at
 # any time.
 #-----------------------------------------------------------------------------------------
@@ -27,11 +28,10 @@ SHA=""
 SHORT_SHA=""
 BUILD_DIR=$DEFAULT_BUILD_DIR
 
-# TODO: Correct for this project
 init()
 {
     # get the toolchain
-    # TOOLCHAIN_VERSION=$(grep "ARG ARM_NONE_EABI_PACKAGE_VERSION=" docker/Dockerfile.toolchain | cut -d '"' -f 2)
+    TOOLCHAIN_VERSION=$(grep "ARG ARM_NONE_EABI_PACKAGE_VERSION=" docker/Dockerfile.toolchain | cut -d '"' -f 2)
     # Check if local or action...
     # This is janky but it does the job
     ACTION=true
@@ -108,47 +108,50 @@ usage()
     echo "##############################################################################" 
     echo "Usage" 
     echo "-a for About - logs meta info std out"
-    # TODO: Add remaing uses
+    echo "-b for West Build (local) - uses west to build the project"
+    echo "-f for West Flash - uses west to erase and flash"
+    echo "-c for Clean - will remove the local build directory"
+    # TODO: Add remaining uses
     echo "##############################################################################" 
 }
 
 #-----------------------------------------------------------------------------------------
 # build_from_local
-# Description: Will build configure create a fresh build dir, configure cmake, and build
-# artifacts.
+# Will build the artifact local, using west, in build/zephyr/.
+# See link for more info: 
+# https://docs.zephyrproject.org/latest/guides/west/build-flash-debug.html#building-west-build
 #-----------------------------------------------------------------------------------------
 build_from_local()
 {
-    # TODO
+    # build
+    echo "Building local with west"
+    west build -b nrf9160dk_nrf9160_ns
 }
 
 #-----------------------------------------------------------------------------------------
-# build_from_container
-# Description: Will use the tool chain image and call build_from_local inside the 
-# container.
+# flash
+# Will flash the hex onto the device using West through JLink. Ensure you have built the binary
+# first.
+# See link for more info: 
+# https://docs.zephyrproject.org/latest/guides/west/build-flash-debug.html#flashing-west-flash
 #-----------------------------------------------------------------------------------------
-build_from_container()
+flash()
 {
-    # TODO
+    # flash
+    echo "Flashing with west"
+    west flash
 }
+
 
 #-----------------------------------------------------------------------------------------
 # clean
-# Description: Performs clean up
 #-----------------------------------------------------------------------------------------
 clean()
 {
-    # TODO
+    # remove build dir
+    remove_build_dir
 }
 
-#-----------------------------------------------------------------------------------------
-# clean_all
-# Description: Performs clean up of everything
-#-----------------------------------------------------------------------------------------
-clean_all()
-{
-    # TODO
-}
 
 # init
 init
@@ -158,7 +161,9 @@ while getopts ":hatbdcs" options; do
     case $options in
         h ) usage ;;                # usage (help)
         a ) about ;;                # about
-        # TODO
+        b ) build_from_local ;;     # build local
+        f ) flash ;;                # flash
+        c ) clean ;;                # clean
         * ) usage ;;                # default (help)
     esac
 done
