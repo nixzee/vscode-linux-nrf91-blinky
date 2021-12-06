@@ -47,7 +47,7 @@ This project was developed in [Ubuntu 20.04.2 LTS](https://releases.ubuntu.com/2
 
 To setup the tools you can use the [install manually](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_installing.html) instructions found in the nrf sdk documnetation. However, I found a few gotchas and I am not sure you need everything they say you need. Below are my instructions that largely satify the [requirements table](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_recommended_versions.html#gs-recommended-versions).
 
-### Install the Required Tools
+### Required Tools
 
 1. Add the Kitware APT repository. Perform from the home user directory.
 
@@ -96,9 +96,9 @@ To setup the tools you can use the [install manually](https://developer.nordicse
     rm kitware-archive.sh
     ```
 
-### Install West
+### West
 
-Click to read more about [West](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/zephyr/guides/west/index.html#west).
+[West](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/zephyr/guides/west/index.html#west) is Zephyr's build and management tool.
 
 1. PIP install West to local user.
 
@@ -139,12 +139,12 @@ Click to read more about [West](https://developer.nordicsemi.com/nRF_Connect_SDK
     West version: v0.12.0
     ```
 
-### Get the nRF Connect SDK
+### nRF Connect SDK
 
-Click here to read up on the [nRF Connect SDK](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/introduction.html#ncs-introduction).
+The [nRF Connect SDK](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/introduction.html#ncs-introduction) provides the nRF and Zephyr SDKs along with other depedencies, tools, and SVDs.
 
-1. From the user home folder create and enter a directory called ```ncs```. This will be used to house the nRF and Zephyr SDKs along with other depedencies, tools, and SVDs.
 
+1. From the user home folder create and enter a directory called ```ncs```.
     ```shell
     mkdir ncs && cd ncs
     ```
@@ -179,7 +179,7 @@ Click here to read up on the [nRF Connect SDK](https://developer.nordicsemi.com/
     drwxrwxr-x 22 nixzee nixzee 4096 Dec  6 15:30 zephyr
     ```
 
-### Install Additional Python Dependencies
+### Additional Python Dependencies
 
 1. From the root of the ```ncs``` directory, run the following commands. This will take a few minutes.
 
@@ -189,9 +189,9 @@ Click here to read up on the [nRF Connect SDK](https://developer.nordicsemi.com/
     pip3 install --user -r bootloader/mcuboot/scripts/requirements.txt
     ```
 
-### Install the GNU Arm Embedded Toolchain
+### GNU Arm Embedded Toolchain
 
-Click to read about [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
+We need to install the [GNU Arm Embedded Toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) in order to cross compile and debug for the nRF9160.
 
 1. From the user home directory, get the GNU Arm Embedded Toolchain and extract to the ```/usr/local```. This is different from the Nordic instructions. I prefer to keep my home directory prsitine. Once extracted cleanup. This will take a few minutes.
 
@@ -258,9 +258,9 @@ Click to read about [GNU Arm Embedded Toolchain](https://developer.arm.com/tools
     There is NO WARRANTY, to the extent permitted by law.
     ```
 
-### Download nRF Command Line tools
+### nRF Command Line tools
 
-Click to read about the [nRF Command Line Tools](https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools/download).
+The [nRF Command Line Tools](https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools/download) is an archive that provides tools to program the microcontroller.
 
 1. Install unzip since the tools are stored in a zip even for Linux.
 
@@ -320,6 +320,45 @@ Click to read about the [nRF Command Line Tools](https://www.nordicsemi.com/Prod
     nrfjprog version: 10.15.1 external
     JLinkARM.dll version: 7.58b
     ```
+
+### Docker
+
+The following steps are to install Docker. [Docker](https://www.docker.com/) is used to create/use containers. This will be used later for CICD. Its also handy is you want to generate artifacts and dont want to setup a complete development enviroment.
+
+1. Update and get dependencies.
+
+    ```shell
+    sudo apt update
+    sudo apt install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+    ```
+
+2. Install.
+
+    ```shell
+    sudo apt update
+    sudo apt install docker-ce docker-ce-cli containerd.io
+    ```
+
+3. Test by running the following command.
+
+    ```shell
+    sudo docker --version
+    ```
+
+    You should see something like this:
+
+    ```shell
+    Docker version 20.10.10, build b485636
+    ```
+
+4. Now we need to give non-root access to docker because of reasons...
+
+    ```shell
+    sudo groupadd docker
+    sudo gpasswd -a $USER docker
+    ```
+
+5. Now after next session login or reboot you should be able to run docker commands as non-root (no sudo).
 
 ### Confirm Its Working
 

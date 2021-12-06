@@ -20,61 +20,98 @@ ARG ARM_NONE_EABI_PACKAGE_FILENAME="$ARM_NONE_EABI_PACKAGE_NAME-$ARM_NONE_EABI_A
 ARG ARM_NONE_EABI_FULL_URL="$ARM_NONE_EABI_BASE_URL/$ARM_NONE_EABI_PACKAGE_DATE/$ARM_NONE_EABI_PACKAGE_FILENAME"
 ARG TOOLCHAIN_BASE_PATH="/usr/local"
 ARG TOOLCHAIN_FULL_PATH="$TOOLCHAIN_BASE_PATH/$ARM_NONE_EABI_PACKAGE_NAME/bin"
+# nRF Connect SDK args
+ARG NRF_CONNECT_SDK_MR="main"
 # Meta args
 ARG GIT_COMMIT="unspecified"
 ARG MAINTAINERS="https://github.com/nixzee"
 
-# #---------------------------------------------------------------------------------------------------
-# # Section: base
-# # Sets up all the dependencies and compiler
-# #---------------------------------------------------------------------------------------------------
-# FROM ${DOCKER_BUILD_IMAGE} AS base
+#---------------------------------------------------------------------------------------------------
+# Section: toolchain
+# TODO: Split into multi-stage and/or optimize
+# https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_recommended_versions.html#req-tools-table
+#---------------------------------------------------------------------------------------------------
+FROM ${DOCKER_BUILD_IMAGE} AS toolchain
 
-# # Declare args in scope
-# ARG DEBIAN_FRONTEND
-# ARG ARM_NONE_EABI_BASE_URL
-# ARG ARM_NONE_EABI_PACKAGE_DATE
-# ARG ARM_NONE_EABI_PACKAGE_VERSION
-# ARG ARM_NONE_EABI_ARCH
-# ARG ARM_NONE_EABI_PACKAGE_NAME
-# ARG ARM_NONE_EABI_PACKAGE_FILENAME
-# ARG ARM_NONE_EABI_FULL_URL
-# ARG TOOLCHAIN_BASE_PATH
-# ARG TOOLCHAIN_FULL_PATH
-# ARG GIT_COMMIT
-# ARG MAINTAINERS
+# Declare args in scope
+ARG DEBIAN_FRONTEND
+ARG ARM_NONE_EABI_BASE_URL
+ARG ARM_NONE_EABI_PACKAGE_DATE
+ARG ARM_NONE_EABI_PACKAGE_VERSION
+ARG ARM_NONE_EABI_ARCH
+ARG ARM_NONE_EABI_PACKAGE_NAME
+ARG ARM_NONE_EABI_PACKAGE_FILENAME
+ARG ARM_NONE_EABI_FULL_URL
+ARG TOOLCHAIN_BASE_PATH
+ARG TOOLCHAIN_FULL_PATH
+ARG NRF_CONNECT_SDK_MR
 
-# # Set the Debian interactive dialogue
-# # Explination: https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubuntu-debian/
-# ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
+# Set the Debian interactive dialogue
+# Explanation: https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubuntu-debian/
+ENV DEBIAN_FRONTEND=${DEBIAN_FRONTEND}
 
-# # Install dependecy packages
-# RUN apt-get update && \
-#     apt-get install -y \
-#     git \
-#     build-essential \
-#     libncurses5 \
-#     wget \
-#     make \
-#     cmake \
-#     python3 \
-#     && apt-get clean
+# Install dependecy packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    cmake \
+    ninja-build \
+    gperf \
+    ccache dfu-util \
+    device-tree-compiler \
+    wget \
+    python3-dev \
+    python3-pip \
+    python3-setuptools \
+    python3-tk python3-wheel \
+    xz-utils \
+    file \
+    make \
+    gcc \
+    gcc-multilib \
+    g++-multilib \
+    libsdl2-dev \
+    build-essential \
+    libncurses5 \
+    libncurses5-dev
 
-# # Download and Install arm-none-eabi-gcc
-# RUN wget $ARM_NONE_EABI_FULL_URL \
-#     && tar -xvf ${ARM_NONE_EABI_PACKAGE_FILENAME} --strip-components=1 -C ${TOOLCHAIN_BASE_PATH} \
-#     && rm -rf ${ARM_NONE_EABI_PACKAGE_FILENAME}
+# Add the Kitware APT repository
+RUN wget https://apt.kitware.com/kitware-archive.sh \
+    && bash kitware-archive.sh \
+    && rm kitware-archive.sh
 
-# # Set the toolchain path and check
-# ENV PATH "${TOOLCHAIN_FULL_PATH}:$PATH"
-# RUN arm-none-eabi-gcc --version
+# Confirm depedency versions
+RUN cmake --version
+RUN python3 --version
+RUN dtc --version
 
-# # Setup the working directory
-# RUN mkdir workspace
+# Install west, add to path, and confirm version
+# TODO
+RUN pip3 install -U west
+RUN west --version
 
-# # Set labels
-# LABEL commit=${GIT_COMMIT}
-# LABEL maintainer=${MAINTAINERS}
+# Get the nRF Connect SDK
+RUN mkdir ncs && cd ncs \
+    && west init -m https://github.com/nrfconnect/sdk-nrf --mr ${NRF_CONNECT_SDK_MR} \
+    && west update
 
-# # TODO: Multi-stage the gcc toolchain to remove the tar layer and copy only what is needed.
-# # TODO: Should look into slimming down image considerably and maybe switch from Ubuntu.
+# Install Python dependencies in NCS
+RUN pip3 install -r zephyr/scripts/requirements.tx \
+    && pip3 install -r nrf/scripts/requirements.txt \
+    && pip3 install -r bootloader/mcuboot/scripts/requirements.txt
+
+# Download and Install arm-none-eabi-gcc
+RUN wget $ARM_NONE_EABI_FULL_URL \
+    && tar -xvf ${ARM_NONE_EABI_PACKAGE_FILENAME} --strip-components=1 -C ${TOOLCHAIN_BASE_PATH} \
+    && rm -rf ${ARM_NONE_EABI_PACKAGE_FILENAME}
+
+# Set the toolchain path and confirm version
+ENV PATH "${TOOLCHAIN_FULL_PATH}:$PATH"
+ENV ZEPHYR_TOOLCHAIN_VARIANT "gnuarmemb"
+ENV GNUARMEMB_TOOLCHAIN_PATH "${TOOLCHAIN_FULL_PATH}"
+RUN arm-none-eabi-gcc --version
+RUN arm-none-eabi-gdb --version
+
+# Set labels
+LABEL commit=${GIT_COMMIT}
+LABEL maintainer=${MAINTAINERS}
