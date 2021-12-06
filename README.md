@@ -360,17 +360,81 @@ At this point, you should be able to build and flash from command line. This sec
 
 ---
 
-## Development Enviroment Setup (VS Code IDE)
+## Development Enviroment Setup
 
 This project makes use of [VS Code](https://code.visualstudio.com) as its IDE. I prefer VS Code because its free and runs on anything, stable, many extensions, and can be used with many languages. This project makes use of some extensions like Cortex-Debug and C/C++ IntelliSense. More info and instructions below.
 
-TODO
+### Clone The Repo
+
+Before cloning the repo, make sure you have [setup an SSH authentication on GitHub](https://docs.github.com/en/authentication/connecting-to-github-with-ssh). Additionally, if you are seperating your proffesional and personal GitHub accounts do not forget to setup ```~/.ssh/config``` with the appropriate hostname and identities in ```~/.gitconfig```. Then when cloning, swap the hostnames accordingly or you will have a bad time. If you do not have seperate accounts, just clone.
+
+1. We will need to clone the repo into the ```ncs``` directory. This is because West does some stupid stuff with [workspaces](https://docs.zephyrproject.org/latest/guides/west/basics.html).
+
+    ```shell
+    cd ~/ncs
+    git clone git@github.com:nixzee/vscode-linux-nrf96-blinky.git
+    ```
+
+### Install VS Code
+
+Before continuing, please realize these intstructions are for installing VS Code onto a Windows machine and then using the [Remote Development Extension](https://code.visualstudio.com/docs/remote/remote-overview) to SSH into the VM. You can install VS Code natively if you want and use the same extensions.
+
+1. Install [VS Code](https://code.visualstudio.com/) for your development machine. Install for Windows.
+
+2. Once installed, we install the first plugin. Off to the left, there is a bar with icons. One of the icons looks like blocks. Click on it. Type into to the box ```Search Extensions in Marketplace```, ```Remote Development``` Click on it and click install. Once done, reload VS Code by closing and re-opening.
+
+3. Next we need to connect to VM. You should a green box on the lower left. Click it. A window will popup at the top. Select ```Remote SSH: Connect to Host...```. Click on ```Add New Host``` put in the following (swap the IP for the IP of the VM).
+
+    ```shell
+    nixzee@<IP>
+    ```
+
+4. Following any prompts.
+
+5. Open the project. Click ```File >> Open Folder```. Select ```vscode-linux-nrf96-blinky```. Click OK. Enter your password.
+
+6. We will now install all the plugins. As before, click on the plugins icon. We will instll the following on. Some of these are not really neccisary but handy to have.
+
+    * C/C++
+    * C/C++ Intellisense
+    * Cortex-Debug
+    * Docker
+    * CMake
+    * CMake Tools
+    * Doxygen Documentation Generator
+    * markdownlint
+    * Todo Tree
+
+7. Perform a window reload <kbd>Ctrl</kbd>+<kbd>shift</kbd>+<kbd>p</kbd> and type ```window reload``` and hit enter. Log back in.
+
+8. Now we need to select the CMake kit so that CMake knows which compiler to use. On the very bottom on the blue tool bar you should see something with a tool icon and says ```No Active kit```. Click it and click the ```Scan for Kits``` at the top of the window. Wait for it to finish. Now select the ```No Active kit``` again. Select ```GCC 9.2.1 arm-none-eabi``` at the top of the window. This is the toolchain we installed earlier.
+
+9. Confirm that CMake is working. Click the ```Build``` in the blue bar at the bottom of the screen. If works you should see something like this.
+
+    ```shell
+    ...
+    [build] [170/171  99% :: 13.172] Linking C executable zephyr/zephyr.elf
+    [build] Memory region         Used Size  Region Size  %age Used
+    [build]            FLASH:       29176 B       960 KB      2.97%
+    [build]             SRAM:        6528 B     178968 B      3.65%
+    [build]         IDT_LIST:          0 GB         2 KB      0.00%
+    [build] [171/171 100% :: 13.449] Generating zephyr/merged.hex
+    [build] Build finished with exit code 0
+    ```
+
+The next time you connect, click the green box again and select your device. You will need to open the project folder each time since the connection will take you to home.
 
 ---
 
 ## Building and Debug
 
-TODO
+At this point, you have a few ways you can build. You can build manually from command line using West directly or using VS Code. Additionally, VS Code will allow you to debug (break point, single step, etc). with the use of the [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug) extension. Before continuing, make sure you have plugged in the nRF9160 DK board and attach to your VM is using one.
+
+### Debug From VS Code
+
+1. With VS Code open and in the repo diretory, click ```Run >> Start Debugging```. VS Code will then build and flash the board (A lot is happening behind the scenes). If succesfull, the debug instance will pause on ```compiler_barrier()```;. Just hit the resume button.
+
+2. At this point you are now debugging. You can add break points and single step through the source code. Additionally, you should be able to see your variables, create watches, see the callstack, and look at the Cortex peripherals and registers.
 
 ---
 
