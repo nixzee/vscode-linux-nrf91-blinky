@@ -53,7 +53,7 @@ jobs:
           pip3 install --user -r ../bootloader/mcuboot/scripts/requirements.txt
       - name: Compile with west
         run: |
-          west build -b nrf5340dk_nrf5340_cpuapp        
+          west build -b nrf9160dk_nrf9160_ns        
       - name: Publish artifacts
         uses: actions/upload-artifact@v2
         with:

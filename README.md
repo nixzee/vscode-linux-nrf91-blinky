@@ -1,10 +1,10 @@
-# <img src="https://raw.githubusercontent.com/nixzee/nixzee-branding/master/images/nixzee-logo-base.png" width="100"> vscode-linux-nrf96-blinky
+# <img src="https://raw.githubusercontent.com/nixzee/nixzee-branding/master/images/nixzee-logo-base.png" width="100"> vscode-linux-nrf91-blinky
 
 This repo provides everything you will need to get to blinky on the nRF9160 DK with Ubuntu, VScode (with debug), and GitHub CI/CD. Before going any further, I want to thank Edgar and his [nrf53 Blinky repo](https://github.com/edgargrimberg/nrf53_blinky) which was used as a reference.
 
 ## Motivation
 
-I wanted the typical Blinky example for my board, the nRF9610 DK, that I could build, debug and flash through VS Code. Yes, I am aware of the nrf extension but I found it to be buggy and I wanted something more native. Additionally, I wanted to be able to do all of this outside of the nrf [SDK](https://github.com/nrfconnect/sdk-nrf) or [Zephyr](https://github.com/zephyrproject-rtos/zephyr) SDKs. I also wanted to have a [GitHub Action](https://github.com/features/actions) that would build the artifacts on a PR. My hope is that you can take this repo and use it as an example in your own projects.
+I wanted the typical Blinky example for my board, the nRF9160 DK, that I could build, debug and flash through VS Code. Yes, I am aware of the nrf extension but I found it to be buggy and I wanted something more native. Additionally, I wanted to be able to do all of this outside of the nrf [SDK](https://github.com/nrfconnect/sdk-nrf) or [Zephyr](https://github.com/zephyrproject-rtos/zephyr) SDKs. I also wanted to have a [GitHub Action](https://github.com/features/actions) that would build the artifacts on a PR. My hope is that you can take this repo and use it as an example in your own projects.
 
 ---
 
@@ -12,11 +12,11 @@ I wanted the typical Blinky example for my board, the nRF9610 DK, that I could b
 
 The project directory structure is broken down as follows:
 
-* [.github/](https://github.com/nixzee/vscode-linux-nrf96-blinky/tree/main/.github/workflows) - Directory that contains GitHub Actions.
-* [.vscode/](https://github.com/nixzee/vscode-linux-nrf96-blinky/tree/main/.vscode) - Directory that contains VS Code configurations.
+* [.github/](https://github.com/nixzee/vscode-linux-nRF91-blinky/tree/main/.github/workflows) - Directory that contains GitHub Actions.
+* [.vscode/](https://github.com/nixzee/vscode-linux-nRF91-blinky/tree/main/.vscode) - Directory that contains VS Code configurations.
 * build/ - Directory that contains the build artifacts. Is captured by the ```.gitignore```.
-* [.docker/](https://github.com/nixzee/vscode-linux-nrf96-blinky/tree/main/docker) - Directory that contains the dockerfiles.
-* [.src/](https://github.com/nixzee/vscode-linux-nrf96-blinky/tree/main/docker) - Directory that containes the source code. ```main.c``` is the entrypoint.
+* [.docker/](https://github.com/nixzee/vscode-linux-nRF91-blinky/tree/main/docker) - Directory that contains the dockerfiles.
+* [.src/](https://github.com/nixzee/vscode-linux-nRF91-blinky/tree/main/docker) - Directory that containes the source code. ```main.c``` is the entrypoint.
 * cicd.sh - A script that assists with building local or in GitHub.
 * prj.conf - A file that is used by [Zephyr's Kconfig](https://docs.zephyrproject.org/latest/application/index.html)
 
@@ -26,7 +26,7 @@ The project directory structure is broken down as follows:
 
 Below are list of parts to get you to blinky:
 
-* 1x [nRF9610 DK](https://www.nordicsemi.com/Products/Development-hardware/nRF9160-DK/GetStarted)
+* 1x [nRF9160 DK](https://www.nordicsemi.com/Products/Development-hardware/nRF9160-DK/GetStarted)
 * 1x Micro USB Cable
 
 ---
