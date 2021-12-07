@@ -11,7 +11,7 @@
             "gdbPath" : "arm-none-eabi-gdb",
             "device": "nrf9160_xxAA",
             "interface": "swd",
-            "svdFile": "${workspaceFolder}/../modules/hal/nordic/nrfx/mdk/nrf9610.svd",
+            "svdFile": "${workspaceFolder}/../modules/hal/nordic/nrfx/mdk/nrf9160.svd",
             "runToMain": true,
             "preLaunchCommands": [
                 "load"
