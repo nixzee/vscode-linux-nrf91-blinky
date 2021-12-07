@@ -19,12 +19,14 @@ readonly CONTAINER_BUILDER_BUILDKIT="buildkit"
 readonly DEFAULT_NCS_IMAGE_NAME="ncs"
 readonly DEFAULT_NCS_IMAGE_TAG="latest"
 readonly DEFAULT_NCS_MR="main"
+readonly DEFAULT_NCS_BOARD="nrf9160dk_nrf9160_ns" # Review later
 readonly DEFAULT_BUILD_DIR="build"
 # Globals
 REGISTRY=""
 CONTAINER_BUILDER=$CONTAINER_BUILDER_DOCKER
 NCS_IMAGE_NAME=$DEFAULT_NCS_IMAGE_NAME
 NCS_IMAGE_FULL=""
+NCS_BOARD=$DEFAULT_NCS_BOARD
 SHA=""
 SHORT_SHA=""
 BUILD_DIR=$DEFAULT_BUILD_DIR
@@ -96,6 +98,7 @@ about()
     echo "GNU_ARM_EMBEDDED_TOOLCHAIN_VERSION: $GNU_ARM_EMBEDDED_TOOLCHAIN_VERSION"
     echo "ZEPHYR_TOOLCHAIN_VARIANT_ENV: $ZEPHYR_TOOLCHAIN_VARIANT_ENV"
     echo "GNUARMEMB_TOOLCHAIN_PATH_ENV: $GNUARMEMB_TOOLCHAIN_PATH_ENV"
+    echo "NCS_BOARD: $NCS_BOARD"
     echo ""
     echo "[Container]" 
     echo "REGISTRY: $REGISTRY"
@@ -184,7 +187,7 @@ west_build()
 {
     # build
     echo "Building local with west"
-    west build -b nrf9160dk_nrf9160_ns
+    west build -b $NCS_BOARD
     status_check $?
     echo ""
 }

@@ -143,8 +143,8 @@ To setup the tools you can use the [install manually](https://developer.nordicse
 
 The [nRF Connect SDK](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/introduction.html#ncs-introduction) provides the nRF and Zephyr SDKs along with other depedencies, tools, and SVDs.
 
-
 1. From the user home folder create and enter a directory called ```ncs```.
+
     ```shell
     mkdir ncs && cd ncs
     ```
@@ -469,14 +469,136 @@ The next time you connect, click the green box again and select your device. You
 
 At this point, you have a few ways you can build. You can build manually from command line using West directly or using VS Code. Additionally, VS Code will allow you to debug (break point, single step, etc). with the use of the [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug) extension. Before continuing, make sure you have plugged in the nRF9160 DK board and attach to your VM is using one.
 
-### Debug From VS Code
+The only section below that covers debugging is **VS Code**. You can debug from west but I find it easier to use the IDE since you have all your tools and source in a nice in one place.
+
+### VS Code
+
+I find this to be the prefered method for building and debugging. TODO
 
 1. With VS Code open and in the repo diretory, click ```Run >> Start Debugging```. VS Code will then build and flash the board (A lot is happening behind the scenes). If succesfull, the debug instance will pause on ```compiler_barrier()```;. Just hit the resume button.
 
 2. At this point you are now debugging. You can add break points and single step through the source code. Additionally, you should be able to see your variables, create watches, see the callstack, and look at the Cortex peripherals and registers.
 
+### Command Line (West)
+
+Please read the [official documentation](https://docs.zephyrproject.org/latest/guides/west/build-flash-debug.html) regarding building and flashing with west.
+
+1. Nagivgate to the project.
+
+    ```shell
+    cd  ~/ncs/vscode-linux-nrf96-blinky
+    ```
+
+2. Build the target. You can use the pristine flag ```-p``` if you want to delete all files in the build directory.
+
+    ```shell
+    west build -b nrf9160dk_nrf9160_ns
+    ```
+
+3. Flash the target. You can use the erase flag ```--erase``` if you want to erase flash first.
+
+    ```shell
+    west flash
+    ```
+
+### Script Using West
+
+The ```cicd.sh``` script provides arguerments for common commands. This section will use two of the arguements to build and flash the board. Under the hoad, these options are using west. Use the help flag ```-h``` to learn about the script.
+
+1. Nagivgate to the project.
+
+    ```shell
+    cd  ~/ncs/vscode-linux-nrf96-blinky
+    ```
+
+2. Change the permission of the script to execute if hasn't been done already and test
+
+    ```shell
+    chmod +x cicd.sh
+    ./cicd.sh -a
+    ```
+
+    You should see something like this:
+
+    ```shell
+    [Git]
+    SHA: dec43fb0db99ba02c2ba14bf38c7b156aac2497f
+    SHORT_SHA: dec43fb
+    IN_ACTION: false
+
+    [Enviroment]
+    OS_INFO: Linux ubuntu-2004-dev 5.4.0-91-generic 
+    CMAKE_VERSION: 3.22.0
+    PYTHON3_VERSION: 3.8.10
+    DTC_VERSION: 1.5.0
+    WEST_VERSION: v0.12.0
+    GNU_ARM_EMBEDDED_TOOLCHAIN_VERSION: 9.2.1 20191025
+    ZEPHYR_TOOLCHAIN_VARIANT_ENV: gnuarmemb
+    GNUARMEMB_TOOLCHAIN_PATH_ENV: /home/nixzee/gnuarmemb/gcc-arm-none-eabi-9-2019-q4-major
+    NCS_BOARD: nrf9160dk_nrf9160_ns
+
+    [Container]
+    REGISTRY:
+    CONTAINER_BUILDER: docker
+    NCS_IMAGE_FULL: ncs:latest
+    ```
+
+3. Build the target.
+
+    ```shell
+    ./cicd.sh -b
+    ```
+
+    You should see something like this once complete:
+
+    ```shell
+    ...
+    [216/216] Linking C executable zephyr/zephyr.elf
+    Memory region         Used Size  Region Size  %age Used
+               FLASH:         64 KB        64 KB    100.00%
+                SRAM:       11808 B        64 KB     18.02%
+            IDT_LIST:          0 GB         2 KB      0.00%
+    [163/171] Linking C executable zephyr/zephyr_prebuilt.elf
+
+    [170/171] Linking C executable zephyr/zephyr.elf
+    Memory region         Used Size  Region Size  %age Used
+               FLASH:       29176 B       960 KB      2.97%
+                SRAM:        6528 B     178968 B      3.65%
+            IDT_LIST:          0 GB         2 KB      0.00%
+    [171/171] Generating zephyr/merged.hex
+    ```
+
+4. Flash the target. You can use the erase flag ```--erase``` if you want to erase flash first.
+
+    ```shell
+    west flash
+    ```
+
+    You should see something like this once complete:
+
+    ```shell
+    Flashing with west
+    -- west flash: rebuilding
+    [0/11] Performing build step for 'spm_subimage'
+    ninja: no work to do.
+    -- west flash: using runner nrfjprog
+    Using board 960094144
+    -- runners.nrfjprog: Flashing file: /home/nixzee/ncs/vscode-linux-nrf96-blinky/build/zephyr/merged.hex
+    Parsing image file.
+    Applying system reset.
+    Verified OK.
+    Applying pin reset.
+    -- runners.nrfjprog: Board with serial number 960094144 flashed successfully.
+    ```
+
+### Script Using NCS Container
+
+The script also provides a means to build the artifacts from a container but does not flash. This is handy for CI/CD or if you want to build the artifacts, without setting up the whole enviroment, and then upload the binary via the DFU. The script uses Docker to call a container that mounts the repo into a volume. This container has all tools built into it. The script then executes the ```west build``` command from within the container. This will put all artifacts into the build like the normal build process would.
+
+TODO: Will update once completed and tested. The script is largelly done.
+
 ---
 
 ## GitHub CI/CD
 
-TODO
+Currently, the project makes use a GitHub Action called build.yml. This Action makes use of native GitHub Action components and works well enough. In the future, this will be replaced by the container build method found in the cicd script. This allow the cicd build to be agnostic and work locally as well.
