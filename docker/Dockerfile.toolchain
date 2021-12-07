@@ -22,13 +22,16 @@ ARG TOOLCHAIN_BASE_PATH="/usr/local"
 ARG TOOLCHAIN_FULL_PATH="$TOOLCHAIN_BASE_PATH/$ARM_NONE_EABI_PACKAGE_NAME/bin"
 # nRF Connect SDK args
 ARG NRF_CONNECT_SDK_MR="main"
+ARG NRF_CONNECT_SDK_DIR="ncs"
 # Meta args
 ARG GIT_COMMIT="unspecified"
 ARG MAINTAINERS="https://github.com/nixzee"
 
 #---------------------------------------------------------------------------------------------------
 # Section: toolchain
-# TODO: Split into multi-stage and/or optimize
+# Description: This dockerfile is responsible for creating a Toolchain image that is used to build
+# artifacts.
+# nRF Connect SDK Requirements:docke
 # https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_recommended_versions.html#req-tools-table
 #---------------------------------------------------------------------------------------------------
 FROM ${DOCKER_BUILD_IMAGE} AS toolchain
@@ -45,6 +48,9 @@ ARG ARM_NONE_EABI_FULL_URL
 ARG TOOLCHAIN_BASE_PATH
 ARG TOOLCHAIN_FULL_PATH
 ARG NRF_CONNECT_SDK_MR
+ARG NRF_CONNECT_SDK_DIR
+ARG GIT_COMMIT
+ARG MAINTAINERS
 
 # Set the Debian interactive dialogue
 # Explanation: https://www.cyberciti.biz/faq/explain-debian_frontend-apt-get-variable-for-ubuntu-debian/
@@ -81,24 +87,27 @@ RUN wget https://apt.kitware.com/kitware-archive.sh \
     && rm kitware-archive.sh
 
 # Confirm depedency versions
-RUN cmake --version
-RUN python3 --version
-RUN dtc --version
+RUN cmake --version \
+    && python3 --version \
+    && dtc --version
 
 # Install west, add to path, and confirm version
-# TODO
-RUN pip3 install -U west
-RUN west --version
+RUN pip3 install -U west \
+    && west --version
+
+# Create NCS directory
+RUN mkdir "${NRF_CONNECT_SDK_DIR}"
+WORKDIR ${NRF_CONNECT_SDK_DIR}
 
 # Get the nRF Connect SDK
-RUN mkdir ncs && cd ncs \
-    && west init -m https://github.com/nrfconnect/sdk-nrf --mr ${NRF_CONNECT_SDK_MR} \
+RUN west init -m https://github.com/nrfconnect/sdk-nrf --mr ${NRF_CONNECT_SDK_MR} \
     && west update
 
 # Install Python dependencies in NCS
-RUN pip3 install -r zephyr/scripts/requirements.tx \
+RUN pip3 install -r zephyr/scripts/requirements.txt \
     && pip3 install -r nrf/scripts/requirements.txt \
     && pip3 install -r bootloader/mcuboot/scripts/requirements.txt
+    
 
 # Download and Install arm-none-eabi-gcc
 RUN wget $ARM_NONE_EABI_FULL_URL \
@@ -106,12 +115,18 @@ RUN wget $ARM_NONE_EABI_FULL_URL \
     && rm -rf ${ARM_NONE_EABI_PACKAGE_FILENAME}
 
 # Set the toolchain path and confirm version
+# This sets the paths for zephyr and generic use
 ENV PATH "${TOOLCHAIN_FULL_PATH}:$PATH"
 ENV ZEPHYR_TOOLCHAIN_VARIANT "gnuarmemb"
 ENV GNUARMEMB_TOOLCHAIN_PATH "${TOOLCHAIN_FULL_PATH}"
-RUN arm-none-eabi-gcc --version
-RUN arm-none-eabi-gdb --version
+RUN arm-none-eabi-gcc --version \
+    && arm-none-eabi-gdb --version \
+    && echo $ZEPHYR_TOOLCHAIN_VARIANT \
+    && echo $GNUARMEMB_TOOLCHAIN_PATH
 
-# Set labels
+# Set labels for easy inpsectin'
 LABEL commit=${GIT_COMMIT}
 LABEL maintainer=${MAINTAINERS}
+LABEL nrf_connect_sdk_mr=${NRF_CONNECT_SDK_MR}
+LABEL zephyr_toolchain_variant=${ZEPHYR_TOOLCHAIN_VARIANT}
+LABEL gnuarmemb_toolchain_path=${GNUARMEMB_TOOLCHAIN_PATH} 
