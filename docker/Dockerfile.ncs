@@ -1,8 +1,10 @@
 #syntax=docker/dockerfile:1.2
 #---------------------------------------------------------------------------------------------------
-# Toolchain
-# Description: This dockerfile is responsible for creating a Toolchain image that is used to build
+# nRF-Connect-SDK (ncs)
+# Description: This dockerfile is responsible for creating a ncs image that is used to build
 # artifacts.
+# nRF Connect SDK Requirements:
+# https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_recommended_versions.html#req-tools-table
 #---------------------------------------------------------------------------------------------------
 
 # declare arguments with defaults
@@ -28,13 +30,10 @@ ARG GIT_COMMIT="unspecified"
 ARG MAINTAINERS="https://github.com/nixzee"
 
 #---------------------------------------------------------------------------------------------------
-# Section: toolchain
-# Description: This dockerfile is responsible for creating a Toolchain image that is used to build
-# artifacts.
-# nRF Connect SDK Requirements:docke
-# https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/gs_recommended_versions.html#req-tools-table
+# Section: ncs
+# Description: Performs the "manual install" of the nRF Connect SDK with all tools and dependencies.
 #---------------------------------------------------------------------------------------------------
-FROM ${DOCKER_BUILD_IMAGE} AS toolchain
+FROM ${DOCKER_BUILD_IMAGE} AS ncs
 
 # Declare args in scope
 ARG DEBIAN_FRONTEND
